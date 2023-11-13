@@ -37,6 +37,14 @@ export class AppComponent implements OnInit {
     window.location.reload();
   }
 
+  checkLogin(): boolean {
+    if(this.authService.getToken()) {
+      return true;
+    } else {
+      return false;
+    };
+  }
+
 
 
 

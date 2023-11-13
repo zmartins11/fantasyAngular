@@ -15,10 +15,11 @@ export class NavBarComponent implements OnInit{
   constructor(private authService : AuthService) {}
 
   ngOnInit(): void {
-    this.content = this.authService.getToken();
-    if (this.content) {
-      this.isLoggedIn = true;
-    }
+  
+  }
+
+  loggedIn() {
+    return localStorage.getItem('token');
   }
 
 }
