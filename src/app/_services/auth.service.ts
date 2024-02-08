@@ -3,13 +3,15 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { authResponse } from '../model/authResponse';
 import { User } from '../model/user';
+import { environment } from '../environments/environment';
 
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
 };
 
-const AUTH_API = 'http://localhost:8080/api/auth/';
+const baseApi = environment.apiSpringUrl;
+const AUTH_API = `${baseApi}/api/auth/`;
 const TOKEN_KEY = 'auth-token';
 const USER_KEY = 'user';
 const USER_AUTHORITIES = 'auth-authorities';

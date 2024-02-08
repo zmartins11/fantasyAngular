@@ -8,6 +8,7 @@ import { LoginComponent } from './components/login/login.component';
 import { ProfileComponent } from './components/profile/profile.component';
 import { RegisterComponent } from './components/register/register.component';
 import { AuthGuard } from 'src/_helpers/authGuard';
+import { CalendarComponent } from './components/calendar/calendar.component';
 
 const routes: Routes = [
   { path: 'home', component: HomeComponent},
@@ -17,6 +18,7 @@ const routes: Routes = [
   { path: 'user', component: BoardUserComponent },
   { path: 'mod', component: BoardModeratorComponent },
   { path: 'admin', component: BoardAdminComponent },
+  { path: 'calendar', component: CalendarComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' }
 ];
 @NgModule({

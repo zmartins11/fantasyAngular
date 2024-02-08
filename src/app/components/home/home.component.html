@@ -1,6 +1,359 @@
-<div class="container">
-    <header class="jumbotron">
-      <p *ngIf="!isLoggedIn">Welcome to the app. Please log in to access all the content available</p>
-      <p *ngIf="isLoggedIn">Hello {{user}}. Please wait for more features!</p>
-    </header>
+<div class="overlay" [ngClass]="{'show': showPopUpDriversPoints}"></div>
+
+  <!-- Modal -->
+  <div class="modal" #myModal [ngClass]="{'show': showPopUpDriversPoints}" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Points earned in the last race</h5>
+          <button type="button" class="close" aria-label="Close" (click)="closePopup()">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- Loop through the pointsInfo array and display each item -->
+          <div *ngFor="let pointInfo of pointsInfo">
+            {{ pointInfo.position }} -- {{ pointInfo.driverName }}: {{ pointInfo.points }} point{{ pointInfo.points !==
+            1
+            ? 's' : '' }}
+          </div>
+          <div>Total Points: {{ totalPoints }} point{{ totalPoints !== 1 ? 's' : '' }}</div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closePopup()">Close</button>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <div class="container" [ngClass]="{'fade-out': showPopUpDriversPoints}">
+    <div *ngIf="errorMessage" class="alert alert-danger font-weight-bold" role="alert">
+      {{ sessionExpiredMessage }}
+    </div>
+    <div *ngIf="errorMessagePopUp" class="alert alert-danger font-weight-bold" role="alert">
+      {{ errorMessagePopUp }}
+    </div>
+
+    <div *ngIf="showAlertSuccess && successMessage" class="alert alert-success fade-out" role="alert">
+      {{ successMessage }}
+      <button type="button" class="close" (click)="closeAlert('success')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+
+    <div *ngIf="showAlertIncomplete && IncompletePredictionMessage" class="alert alert-warning" role="alert">
+      {{ IncompletePredictionMessage }}
+      <button type="button" class="close" (click)="closeAlert('incomplete')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+
+    <div *ngIf="predictionLocked" class="alert alert-warning" role="alert">
+      You no longer can make a prediction. Quali has already started!
+    </div>
+
+    <header *ngIf="!isLoggedIn" class="jumbotron">
+      <p *ngIf="!isLoggedIn">Welcome to the app. Please log in to access all the content availableTest</p>
+    </header>
+    <div *ngIf="isLoggedIn and formattedDate">
+      <h3 (click)="openRacePopup()" (mouseover)="highlightText()" (mouseout)="removeHighlight()" class="text-center mt-3 clickable-text">
+        Next Race: {{ nameRace }} <img src="assets/images/flags/{{country}}.png" alt="Flag" class="ml-2" width="28" height="17"> | Round: {{ round }}
+      </h3>
+      <div class="row mt-4" *ngIf="!predictionLocked">
+        <div class="col-md-2 offset-md-0 mb-md-0 mb-2 text-center">
+          <div class="circle">
+            <p class="circle-text">{{ timeRemaining.days }}</p>
+            <p>Days</p>
+          </div>
+        </div>
+        <div class="col-md-2 mb-md-0 mb-2 text-center">
+          <div class="circle">
+            <p class="circle-text">{{ timeRemaining.hours }}</p>
+            <p>Hours</p>
+          </div>
+        </div>
+        <div class="col-md-2 mb-md-0 mb-2 text-center">
+          <div class="circle">
+            <p class="circle-text">{{ timeRemaining.minutes }}</p>
+            <p>Minutes</p>
+          </div>
+        </div>
+        <div class="col-md-2 mb-md-0 mb-2 text-center">
+          <div class="circle">
+            <p class="circle-text">{{ timeRemaining.seconds }}</p>
+            <p>Seconds</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          
+          <app-weather [weather]="weatherData" [city]="city" [country]="country"></app-weather>
+        </div>
+      </div>
+
+      
+      <div class="mt-4" *ngIf="predictionLocked">
+        <h5 class="text-center mt-3">Wait for race to be completed, to get the weekend results!</h5>
+      </div>
+    </div>
+
+
+    <div *ngIf="isLoggedIn and !errorMessage" class="container mt-5">
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <!-- Content for the second inner div -->
+          <div class="card">
+            <div class="navigation-dots">
+              <span class="dot" (click)="switchPredictionCard('podium')"
+                [ngClass]="{'active': currentPredictionCard === 'podium'}"></span>
+              <span class="dot" (click)="switchPredictionCard('fastestLap')"
+                [ngClass]="{'active': currentPredictionCard === 'fastestLap'}"></span>
+              <!-- Add more dots if you have additional prediction cards -->
+            </div>
+            <!-- PODIUM -->
+            <div class="card-body" *ngIf="currentPredictionCard === 'podium'">
+              <!-- Add navigation dots for predictions -->
+              <h5 class="card-title">Podium Prediction</h5>
+              <hr class="separator-line">
+
+              <div class="row">
+                <!-- Left box (Second Driver) -->
+                <div class="col-md-4 text-center">
+                  <div class="prediction-box-second">
+                    <p>{{ pSecond }}</p>
+                  </div>
+                </div>
+
+                <!-- Middle box (First Driver) -->
+                <div class="col-md-4 text-center">
+                  <div class="prediction-box-first">
+                    <p>{{ pFirst }}</p>
+                  </div>
+                </div>
+
+                <!-- Right box (Third Driver) -->
+                <div class="col-md-4 text-center">
+                  <div class="prediction-box-third">
+                    <p>{{ pThird }}</p>
+                  </div>
+                </div>
+
+                <div class="row mt-3">
+                  <div class="col-md-12 text-center">
+                    <ng-container *ngIf="!showDrivers; else listShown">
+                      <div *ngIf="!predictionLocked">
+                        <p *ngIf="pHasPodium" class="mb-0">Change Podium Prediction</p>
+                        <p *ngIf="!pHasPodium" class="mb-0">Make your Podium Prediction</p>
+                        <span (click)="showDrivers = !showDrivers">
+                          <fa-icon [icon]="faArrowDown"></fa-icon>
+                        </span>
+                      </div>
+                      <p class="mb-0" *ngIf="predictionLocked">Prediction Locked</p>
+                    </ng-container>
+                    <ng-template #listShown>
+                      <!-- Text and arrow are hidden when the list is shown -->
+                      <span (click)="showDrivers = !showDrivers">
+                        <fa-icon [icon]="faArrowUp"></fa-icon>
+                      </span>
+                    </ng-template>
+                  </div>
+                </div>
+                <div *ngIf="showDrivers" class="row mt-3">
+                  <div class="col-md-6">
+                    <ul>
+                      <li *ngFor="let driver of drivers.slice(0, 10)" class="list-group-item"
+                        (mouseover)="highlightDriver(driver)" (mouseout)="unhighlightDriver(driver)"
+                        (click)="selectDriver(driver)">
+                        <div class="driver-name"
+                          [ngClass]="{'selected-1st': driver.selection === 1, 'selected-2nd': driver.selection === 2, 'selected-3rd': driver.selection === 3}">
+                          {{ driver.name }} {{ driver.selection }}
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="col-md-6">
+                    <ul>
+                      <li *ngFor="let driver of drivers.slice(10)" class="list-group-item"
+                        (mouseover)="highlightDriver(driver)" (mouseout)="unhighlightDriver(driver)"
+                        (click)="selectDriver(driver)">
+                        <div class="driver-name"
+                          [ngClass]="{'selected-1st': driver.selection === 1, 'selected-2nd': driver.selection === 2, 'selected-3rd': driver.selection === 3}">
+                          {{ driver.name }} {{ driver.selection }}
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                  <hr *ngIf="areAllDriversSelected()" class="separator-line">
+                </div>
+                <button type="button" class="btn btn-outline-dark btn-sm mr-3" *ngIf="areAllDriversSelected() and"
+                  (click)="resetPredictions()">Reset Predictions</button>
+                <button type="button" class="btn btn-outline-dark btn-sm" *ngIf="areAllDriversSelected()"
+                  (click)="savePredictions()">
+                  {{ fastest ? 'Save Podium Prediction and Fastest Lap' : 'Save Podium Prediction' }}</button>
+              </div>
+            </div>
+            <!-- FASTESTlAP CARD -->
+            <div class="card-body" *ngIf="currentPredictionCard === 'fastestLap'">
+              <!-- Add navigation dots for predictions -->
+              <h5 class="card-title">FastestLap Prediction</h5>
+              <hr class="separator-line">
+              <div class="row">
+                <!-- Middle box (First Driver) -->
+                <div class="col-md-4 text-center">
+                  <div class="prediction-box-fastest">
+                    <p>{{ pFastestLap }}</p>
+                  </div>
+                </div>
+                <div class="row mt-3">
+                  <div class="col-md-12 text-center">
+                    <ng-container *ngIf="!showDriversFastest; else listShownFastest">
+                      <div *ngIf="!predictionLocked">
+                        <p *ngIf="pHasFastestLap" class="mb-0">Change FastestLap Prediction</p>
+                        <p *ngIf="!pHasFastestLap" class="mb-0">Make your FastestLap Prediction</p>
+                        <span (click)="showDriversFastest = !showDriversFastest">
+                          <fa-icon [icon]="faArrowDown"></fa-icon>
+                        </span>
+                      </div>
+                      <p class="mb-0" *ngIf="predictionLocked">Prediction Locked</p>
+                    </ng-container>
+                    <ng-template #listShownFastest>
+                      <!-- Text and arrow are hidden when the list is shown -->
+                      <span (click)="showDriversFastest = !showDriversFastest">
+                        <fa-icon [icon]="faArrowUp"></fa-icon>
+                      </span>
+                    </ng-template>
+                  </div>
+                </div>
+                <div *ngIf="showDriversFastest" class="row mt-3">
+                  <div class="col-md-6">
+                    <ul>
+                      <li *ngFor="let driver of drivers.slice(0, 10)" class="list-group-item"
+                        (mouseover)="highlightDriver(driver)" (mouseout)="unhighlightDriver(driver)"
+                        (click)="selectFastestDriver(driver)" [class.fastest-driver]="driver.number === fastest">
+                        {{ driver.name }}
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="col-md-6">
+                    <ul>
+                      <li *ngFor="let driver of drivers.slice(10)" class="list-group-item"
+                        (mouseover)="highlightDriver(driver)" (mouseout)="unhighlightDriver(driver)"
+                        (click)="selectFastestDriver(driver)" [class.fastest-driver]="driver.number === fastest">
+                        {{ driver.name }}
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-outline-dark btn-sm" *ngIf="fastest && showDriversFastest"
+                  (click)="savePredictions()">
+                  {{ areAllDriversSelected() ? 'Save FastestLap and Podium Prediction' : 'Save FastestLap Prediction' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <!-- Content for the first inner div -->
+          <div class="card">
+            <div class="navigation-dots">
+              <span class="dot" (click)="switchTable('userPoints')"
+                [class.active]="currentTable === 'userPoints'"></span>
+              <span class="dot" (click)="switchTable('driverStandings')"
+                [class.active]="currentTable === 'driverStandings'"></span>
+              <span class="dot" (click)="switchTable('constructorStandings')"
+                [class.active]="currentTable === 'constructorStandings'"></span>
+            </div>
+            <div class="card-body"
+              *ngIf="currentTable === 'userPoints' && totalPointsData && totalPointsData.length > 0">
+              <h5 class="card-title">Leaderboard</h5>
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Username</th>
+                    <th scope="col">Points</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    *ngFor="let data of totalPointsData | paginate:{itemsPerPage:6, currentPage:page, totalItems:totalLength}">
+                    <td>{{ data.position}}</td>
+                    <td [class.highlighted-text]="user === data.username">{{ data.username }}</td>
+                    <td>{{ data.points }}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="pagination">
+                <pagination-controls (pageChange)="page=$event"></pagination-controls>
+              </div>
+            </div>
+            <div class="card-body" *ngIf="currentTable === 'driverStandings'">
+              <h5 class="card-title">Driver Standings</h5>
+              <!-- Driver Standings Table -->
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Driver Name</th>
+                    <th scope="col">Points</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    *ngFor="let driver of getDriversStandings() | paginate:{itemsPerPage:6, currentPage:page, totalItems:totalLength}">
+                    <td>{{ driver.position}}</td>
+                    <td>{{ driver.username }}</td>
+                    <td>{{ driver.points }}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="pagination">
+                <pagination-controls (pageChange)="page=$event"></pagination-controls>
+              </div>
+            </div>
+            <div class="card-body" *ngIf="currentTable === 'constructorStandings'">
+              <h5 class="card-title">Constructor Standings</h5>
+              <!-- Constructor Standings Table -->
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Constructor</th>
+                    <th scope="col">Points</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    *ngFor="let driver of getConstructoresStandings() | paginate:{itemsPerPage:6, currentPage:page, totalItems:totalLength}">
+                    <td>{{ driver.position}}</td>
+                    <td>{{ driver.username }}</td>
+                    <td>{{ driver.points }}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="pagination">
+                <pagination-controls (pageChange)="page=$event"></pagination-controls>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="isLoggedIn and !errorMessage" class="container mt-5 mb-5">
+      <div class="row justify-content-center mb-5">
+        <div class="col-md-6 mb-5">
+          <div style="width: 617px; float: left; margin-right: 20px;">
+            <angular-twitter-timeline [data]="{sourceType: 'url', url: 'https://twitter.com/F1'}"
+              [opts]="{tweetLimit: 10, height: 500}">
+            </angular-twitter-timeline>
+          </div>
+        </div>
+        <div class="col-md-6 mb-5">
+          <div style="float: right;border-radius: 10px;overflow: hidden;">
+            <youtube-player [videoId]="videoId" suggestedQuality="highres" [height]="500" [width]="610">
+            </youtube-player>
+          </div>
+        </div>
+      </div>
+    </div>

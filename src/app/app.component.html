@@ -1,10 +1,7 @@
-<div id="app">
+<div id="app" class="wraper">
   <nav class="navbar navbar-expand navbar-dark bg-dark">
-    <a href="#" class="navbar-brand">bezKoder</a>
+    <a href="#" class="navbar-brand"> F1Predictor</a>
     <ul class="navbar-nav mr-auto" routerLinkActive="active">
-      <li class="nav-item">
-        <a href="/home" class="nav-link" routerLink="home">Home </a>
-      </li>
       <li class="nav-item" *ngIf="showAdminBoard">
         <a href="/admin" class="nav-link" routerLink="admin">Admin Board</a>
       </li>
@@ -12,7 +9,7 @@
         <a href="/mod" class="nav-link" routerLink="mod">Moderator Board</a>
       </li>
       <li class="nav-item">
-        <a href="/user" class="nav-link" *ngIf="checkLogin()" routerLink="user">User</a>
+        <a class="nav-link" *ngIf="checkLogin()" routerLink="calendar">Calendar</a>
       </li>
     </ul>
 
@@ -27,17 +24,21 @@
 
     <ul class="navbar-nav ml-auto" *ngIf="checkLogin()">
       <li class="nav-item">
-        <a href="/profile" class="nav-link" routerLink="profile">{{ username }}</a>
+        <a href="/profile" class="nav-link" routerLink="profile">{{ getUsername() }}</a>
       </li>
       <li class="nav-item">
-        <a href class="nav-link" (click)="logout()">LogOut</a>
+        <a href class="nav-link" (click)="logout()">Logout</a>
       </li>
     </ul>
   </nav>
-<div class="container">
-  <app-nav-bar></app-nav-bar>
-</div>
-  <div class="container">
+
+  <div class="container mb-5" style="background-color: rgba(245, 244, 244, 0.89);">
     <router-outlet></router-outlet>
+    <app-spinner></app-spinner>
   </div>
+  <!-- Sticky Footer -->
+  <footer class="navbar navbar-expand navbar-dark bg-dark footer">
+    <span class="navbar-brand">&copy; 2024 F1Predictor</span>
+  </footer>
+
 </div>
