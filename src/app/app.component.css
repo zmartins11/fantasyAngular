@@ -1,0 +1,12 @@
+
+/* Add this to your global styles or in the component's styles */
+.footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: #343a40; /* Match your navbar's background color */
+    color: white; /* Match your navbar's text color */
+    text-align: center;
+    padding: 10px;
+  }
+  
