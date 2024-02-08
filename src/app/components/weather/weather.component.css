@@ -1,0 +1,53 @@
+.weather-widget {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-top: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.weather-widget:hover {
+  background-color: #e6f7ff;
+  /* Highlight color on hover */
+}
+
+.weather-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.weather-details>div {
+  margin-right: 10px;
+  /* Adjust the margin as needed */
+}
+
+.temperature,
+.wind,
+.humidity {
+  display: flex;
+  align-items: center;
+}
+
+.moving-icon {
+  font-size: 28px;
+  margin-right: 8px;
+  animation: iconMove 2s infinite linear;
+  /* Adjust duration and other properties as needed */
+}
+
+
+@keyframes iconMove {
+  0% {
+    transform: translateX(0);
+  }
+
+  50% {
+    transform: translateX(5px);
+    /* Adjust the distance the cloud moves */
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
